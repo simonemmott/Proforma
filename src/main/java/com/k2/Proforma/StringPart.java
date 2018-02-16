@@ -24,10 +24,7 @@ public class StringPart implements Part {
 	}
 	
 	@Override
-	public String toString() { return value; }
-
-	@Override
-	public Writer write(int indent, Writer out) throws IOException {
+	public Writer write(int indent, Writer out, ProformaOutput po) throws IOException {
 		out.write(value);
 		return out;
 	}

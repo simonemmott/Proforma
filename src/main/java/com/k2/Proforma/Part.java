@@ -23,5 +23,6 @@ public interface Part {
 	 * @return		The output writer for method chaining
 	 * @throws IOException	If there is an error writing to the writer
 	 */
-	public Writer write(int indent, Writer out) throws IOException;
+	public Writer write(int indent, Writer out, ProformaOutput po) throws IOException;
+
 }

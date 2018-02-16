@@ -1,5 +1,7 @@
 package com.k2.Proforma;
 
+import com.k2.Expressions.expression.ParameterExpression;
+
 /**
  * This class represents a parameterized String value
  * 
@@ -11,69 +13,13 @@ package com.k2.Proforma;
  * @author simon
  *
  */
-public class Parameter {
-	private String alias;
-	private String value;
-	private CallBack<String> callBack;
-	private boolean continuousCallback = false;
-	
+public class Parameter<T> extends ParameterExpression<T>{
 	/**
 	 * Create a parameter with the given alias
 	 * 
 	 * @param alias	The alias for the parameter
 	 */
-	Parameter(String alias){
-		this.alias = alias;
+	Parameter(Class<T> javaType, String alias){
+		super(javaType, alias);
 	}
-	
-	/**
-	 * Get the alias of the parameter
-	 * @return	The alias of the parameter
-	 */
-	public String getAlias() { return alias; }
-	
-	/**
-	 * Set the value of the parameter to the given literal value
-	 * @param value	The literal value for the parameter
-	 * @return	This parameter for method chaining
-	 */
-	Parameter setValue(String value) {
-		this.value = value;
-		return this;
-	}
-	
-	/**
-	 * set this parameter to get its value from the given call back the first time the paramter value is requested
-	 * 
-	 * @param callBack	The string callback from which to get the value for this parameter
-	 * @return	This parameter for method chaining
-	 */
-	Parameter setCallback(CallBack<String> callBack) {
-		this.callBack = callBack;
-		return this;
-	}
-	
-	/**
-	 * set this parameter to get its value from the given call back each time the parameter value is requested
-	 * @param callBack	The call back from which to get this parameters value
-	 * @return	This parameter for method chaining
-	 */
-	Parameter setContinuousCallback(CallBack<String> callBack) {
-		this.callBack = callBack;
-		this.continuousCallback = true;
-		return this;
-	}
-	
-	/**
-	 * Get the value for this parameter
-	 */
-	@Override
-	public String toString() {
-		if (continuousCallback) return callBack.get();
-		if (value == null) {
-			value = callBack.get();
-		}
-		return value;
-	}
-
 }

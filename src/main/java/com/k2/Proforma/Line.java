@@ -39,32 +39,21 @@ public class Line {
 	 * @param param	The parameter to add to the line
 	 * @return	This line for method chaining
 	 */
-	Line add(Parameter param) {
+	Line add(Parameter<?> param) {
 		parts.add(new ParameterPart(param));
 		return this;
-	}
-
-	/**
-	 * Output the parts of this line as a string
-	 */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		for (Part part : parts) {
-			sb.append(part.toString());
-		}
-		return sb.toString();
 	}
 
 	/**
 	 * Write the parts of this line to the given writer
 	 * @param indent		The amount of indent to prepend to each new line
 	 * @param out		The writer on which to output the line
+	 * @param proformaOutput 
 	 * @throws IOException	If there is an error writing to the writer
 	 */
-	public void write(int indent, Writer out) throws IOException {
+	public void write(int indent, Writer out, ProformaOutput po) throws IOException {
 		for (Part part : parts) {
-			part.write(indent, out);
+			part.write(indent, out, po);
 		}
 	}
 

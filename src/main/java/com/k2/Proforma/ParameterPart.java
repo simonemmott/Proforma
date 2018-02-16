@@ -2,6 +2,10 @@ package com.k2.Proforma;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
+import java.util.Iterator;
+
+import com.k2.Util.StringUtil;
 
 /**
  * This class represents a parameterized part of a proforma line
@@ -14,30 +18,32 @@ public class ParameterPart implements Part {
 	/**
 	 * The parameter for this part
 	 */
-	private Parameter param;
+	private Parameter<?> param;
 	
 	/**
 	 * Create a parameter part for the given parameter
 	 * @param param	The parameter to use as a part of a proforma line
 	 */
-	ParameterPart(Parameter param) {
+	ParameterPart(Parameter<?> param) {
 		this.param = param;
 	}
 	
 	/**
-	 * Output the value of this parameter as a string
-	 */
-	@Override
-	public String toString() {
-		return param.toString();
-	}
-
-	/**
 	 * Write the value of this parameter to the given writer
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public Writer write(int indent, Writer out) throws IOException {
-		out.write(param.toString());
+	public Writer write(int indent, Writer out, ProformaOutput po) throws IOException {
+		Object value = po.valueOf(param);
+		if (value instanceof Collection) {
+			Collection<?> c = (Collection<?>)value;
+			Iterator<?> i = c.iterator();
+			while (i.hasNext()) {
+				out.write(StringUtil.toString(i.next()));
+			}
+		} else {
+			out.write(StringUtil.toString(value));
+		}
 		return out;
 	}
 

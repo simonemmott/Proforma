@@ -3,7 +3,9 @@ package com.k2.Proforma;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -40,20 +42,26 @@ public class Proforma implements Part
 		String cr() { return cr; }
 	}
 	
-	private Map<String, Parameter> parameters = new HashMap<String, Parameter>();
+	public Proforma() {}
+	
+	private Proforma(Proforma cloneFrom) {
+		this.autoIncrementIndent = cloneFrom.autoIncrementIndent;
+		this.embedded = cloneFrom.autoIncrementIndent;
+		this.lines = cloneFrom.lines;
+		this.valueSourceParameter = cloneFrom.valueSourceParameter;
+	}
+	
 	private List<Line> lines = new ArrayList<Line>();
-	private String indent = "  ";
 	private boolean embedded = false;
 	private boolean autoIncrementIndent = true;
-	private String cr = String.format("%n");
 	
 	/**
 	 * This static method generates a parameter with the given alias
 	 * @param alias		The alias for the parameter
 	 * @return			A parameter with the given alias
 	 */
-	public static Parameter param(String alias) {
-		return new Parameter(alias);
+	public static <T> Parameter<T> param(Class<T> cls, String alias) {
+		return new Parameter<T>(cls,alias);
 	}
 
 	/**
@@ -67,19 +75,48 @@ public class Proforma implements Part
 			if (part instanceof Part) {
 				line.add((Part)part);
 			} else if (part instanceof Parameter) {
-				Parameter param = (Parameter)part;
-				if (parameters.containsKey(param.getAlias())) {
-					line.add(parameters.get(param.getAlias()));
-				} else {
-					parameters.put(param.getAlias(), param);
-					line.add(param);
-				}
+				line.add((Parameter<?>)part);
 			} else {
 				line.add(part.toString());
 			}
 		}
 		lines.add(line);
 		return this;
+	}
+	
+	List<Line> getLines() { return lines; }
+	 
+	boolean embedded() { return embedded; }
+	 
+	boolean autoIncrementIndent() { return autoIncrementIndent; }
+	
+	private Parameter<?> valueSourceParameter;
+	public Proforma with(Parameter<?> valueSourceParameter) {
+		Proforma p = new Proforma(this);
+		p.valueSourceParameter = valueSourceParameter;
+		return p;
+	}
+
+	public <E> ProformaOutput<E> with(E valueSource) {
+		return new ProformaOutput<E>(this, valueSource);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public ProformaOutput<?> setIndent(String indentString) {
+		ProformaOutput<?> po = new ProformaOutput(this);
+		return po.setIndent(indentString);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public ProformaOutput<?> setCarriageReturn(String cr) {
+		ProformaOutput<?> po = new ProformaOutput(this);
+		return po.setCarriageReturn(cr);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public ProformaOutput<?> setCarriageReturn(CarriageReturn cr) {
+		ProformaOutput<?> po = new ProformaOutput(this);
+		return po.setCarriageReturn(cr);
 	}
 
 	/**
@@ -88,55 +125,12 @@ public class Proforma implements Part
 	 * @param value	The string value for the parameter
 	 * @return	This proforma for method chaining
 	 */
-	public Proforma set(String alias, String value) {
-		Parameter param = parameters.get(alias);
-		if (param != null) {
-			param.setValue(value);
-		}
-		return this;
+	@SuppressWarnings({ "rawtypes" })
+	public <E> ProformaOutput<?> set(Class<E> valueClass, String alias, E value) {
+		ProformaOutput<?> po = new ProformaOutput(this);
+		return (ProformaOutput<?>) po.set(valueClass, alias, value);
 	}
 
-	/**
-	 * Set the value for the parameter identified by alias to the give call back.
-	 * @param alias	The alias of the parameter to set
-	 * @param callBack	The call back to get the parameter value
-	 * @return	This parameter for method chaining
-	 */
-	public Proforma set(String alias, CallBack<String> callBack) {
-		return set(alias, callBack, false);
-	}
-
-	/**
-	 * Set the value for the parameter identified by alias to the given call back specifying whether or not to continuously execute the call back
-	 * @param alias		The alias of the parameter to set
-	 * @param callBack	The call back to use to get the parameter value
-	 * @param continuous		True if the call back should be called each time the parameter value is requested
-	 * @return	This parameter for method chaining
-	 */
-	public Proforma set(String alias, CallBack<String> callBack, boolean continuous) {
-		Parameter param = parameters.get(alias);
-		if (param != null) {
-			if (continuous) {
-				param.setContinuousCallback(callBack);
-			} else {
-				param.setCallback(callBack);
-			}
-		}
-		return this;
-	}
-
-	/**
-	 * Set the string to be repeated for the indent.
-	 * 
-	 * The default is '  ' (two spaces)
-	 * @param indent		The string to be repeated for the indent
-	 * @return	This proforma for method chaining
-	 */
-	public Proforma setIndent(String indent) {
-		this.indent = indent;
-		return this;
-	}
-	
 	/**
 	 * Identifies that this proforma is embedded
 	 * 
@@ -161,63 +155,27 @@ public class Proforma implements Part
 		return this;
 	}
 
-	/**
-	 * Set the carriage return to the given string
-	 * @param cr		The string to use as the carriage return
-	 * @return		This proforma for method chaining
-	 */
-	public Proforma setCarriageReturn(String cr) {
-		this.cr = cr;
-		return this;
-	}
-
-	/**
-	 * Set the carriage return to the given carriage return format
-	 * @param cr		The carriage return to use
-	 * @return		This proforma for method chaining
-	 */
-	public Proforma setCarriageReturn(CarriageReturn cr) {
-		this.cr = cr.cr();
-		return this;
-	}
-
-	/**
-	 * This method writes the proforma out to the output writer starting with a 0 indent
-	 * @param out	The output writer
-	 * @return		The output writer for method chaining
-	 */
-	public Writer write(Writer out) {
-		return write(0, out);
-	}
-	/**
-	 * Write the proforma out onto the given writer with the given indent
-	 * 
-	 * IO Exceptions thrown by the writer are converted into the unchecked ProformaError
-	 */
-	public Writer write(int i, Writer out) {
-		for (int l=0; l<lines.size(); l++) {
-			Line line = lines.get(l);
-			try {
-				if (i > 0) {
-					if (l>0 || !embedded) {
-						for (int j=0; j<i; j++) {
-							out.write(indent);
-						}
-					}
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public Writer write(int indent, Writer out, ProformaOutput poIn) throws IOException {
+		ProformaOutput po = new ProformaOutput(this)
+				.setIndent(poIn.getIndent())
+				.setCarriageReturn(poIn.getCarriageReturn());
+		if (valueSourceParameter != null) {
+			Object value = poIn.valueOf(valueSourceParameter);
+			
+			if (value instanceof Collection) {
+				Collection<?> c = (Collection<?>)value;
+				Iterator<?> i = c.iterator();
+				while (i.hasNext()) {
+					po.with(i.next()).write(indent, out);
 				}
-
-				line.write((autoIncrementIndent) ? i+1: i, out);
-
-				if (i >= 0) {
-					if (l<lines.size()-1 || !embedded) {
-						out.write(cr);
-					}
-				}
-			} catch (IOException e) {
-				throw new ProformaError(e);
+				return out;
+			} else {
+				return ((ProformaOutput<?>) po.with(value)).write(indent, out);
 			}
 		}
-		return out;
+		return po.write(indent, out, poIn);
 	}
 
 }
