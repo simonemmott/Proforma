@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Iterator;
 
+import com.k2.Expressions.expression.Expression;
 import com.k2.Util.StringUtil;
 
 /**
@@ -13,7 +14,7 @@ import com.k2.Util.StringUtil;
  * @author simon
  *
  */
-public class ParameterPart implements Part {
+public class ParameterPart extends AbstractPart implements Part {
 	
 	/**
 	 * The parameter for this part
@@ -26,6 +27,16 @@ public class ParameterPart implements Part {
 	 */
 	ParameterPart(Parameter<?> param) {
 		this.param = param;
+		this.conditionalExpression = param.includeIf();
+	}
+	
+	/**
+	 * Create a parameter part as a clone of the given parameter part
+	 * @param clone		The parameter part to clone into the created parameter part
+	 */
+	private ParameterPart(ParameterPart clone) {
+		this.param = clone.param;
+		this.conditionalExpression = clone.conditionalExpression;
 	}
 	
 	/**
@@ -45,6 +56,13 @@ public class ParameterPart implements Part {
 			out.write(StringUtil.toString(value));
 		}
 		return out;
+	}
+
+	@Override
+	public ParameterPart includeIf(Expression<Boolean> conditionalExpression) {
+		ParameterPart p = new ParameterPart(this);
+		p.conditionalExpression = conditionalExpression;
+		return p;
 	}
 
 }

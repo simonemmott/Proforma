@@ -483,4 +483,109 @@ public class ProformaTest {
 		
 	}
 
+	@Test
+	public void ifTest() throws IOException {
+		
+		Proforma proforma = new Proforma()
+				.add("This proforma may contain")
+				.add(simpleFooProforma.includeIf(Proforma.param(Boolean.class, "if")))
+				.add("another proforma");
+		
+		Foo foo = new Foo(1, "hello", "world!");
+
+		String included = 	"This proforma may contain\n" + 
+				"ID: 1\n" + 
+				"\tName: hello\n" + 
+				"\tDescription: world!\n" +
+				"another proforma\n";
+
+		String excluded = 	"This proforma may contain\n" + 
+				"\n" +
+				"another proforma\n";
+
+		StringWriter sw = new StringWriter();
+
+		proforma.with(foo)
+				.set(Boolean.class, "if", true)
+				.setIndent("\t")
+				.write(sw).flush();
+
+		System.out.println(sw.toString());
+		
+		assertEquals(included, sw.toString());
+		
+		sw = new StringWriter();
+		
+		proforma.with(foo)
+				.set(Boolean.class, "if", false)
+				.setIndent("\t")
+				.write(sw).flush();
+		
+		System.out.println(sw.toString());
+		
+		assertEquals(excluded, sw.toString());
+
+	}
+	
+	@Test
+	public void ifTest2() throws IOException {
+		
+		Proforma proforma = new Proforma()
+				.add(	Proforma.includeIf(Proforma.param(Boolean.class, "if"), "Optional "), 
+						Proforma.param(String.class, "optional").includeIf(Proforma.param(Boolean.class, "if")));
+		
+		String included = "Optional part\n";
+		
+		StringWriter sw = new StringWriter();
+
+		proforma.set(Boolean.class, "if", true)
+				.set(String.class, "optional", "part")
+				.write(sw).flush();
+		
+		assertEquals(included, sw.toString());
+
+		String excluded = "\n";
+		
+		sw = new StringWriter();
+
+		proforma.set(Boolean.class, "if", false)
+				.set(String.class, "optional", "part")
+				.write(sw).flush();
+		
+		assertEquals(excluded, sw.toString());
+
+	}
+
+	@Test
+	public void ifLineTest() throws IOException {
+		
+		Proforma proforma = new Proforma()
+				.add("This line is always included")
+				.addIf(Proforma.param(Boolean.class, "if"), "This line may be included")
+				.add("This line is also always included");
+		
+		String included = "This line is always included\n" +
+				"This line may be included\n" +
+				"This line is also always included\n";
+		
+		StringWriter sw = new StringWriter();
+
+		proforma.set(Boolean.class, "if", true)
+				.write(sw).flush();
+		
+		assertEquals(included, sw.toString());
+
+		String excluded = "This line is always included\n" +
+				"This line is also always included\n";
+		
+		sw = new StringWriter();
+
+		proforma.set(Boolean.class, "if", false)
+				.write(sw).flush();
+		
+		assertEquals(excluded, sw.toString());
+
+	}
+
+
 }

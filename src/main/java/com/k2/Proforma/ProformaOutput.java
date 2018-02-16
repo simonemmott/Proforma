@@ -3,21 +3,25 @@ package com.k2.Proforma;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import com.k2.Expressions.ParameterEvaluator;
 import com.k2.Expressions.evaluators.ParamterOrObjectEvaluator;
-import com.k2.Expressions.evaluators.SimpleParameterEvaluator;
-import com.k2.Expressions.expression.CurrentTime;
-import com.k2.Expressions.expression.ParameterExpression;
-import com.k2.Expressions.predicate.Predicate;
 import com.k2.Proforma.Proforma.CarriageReturn;
-import com.k2.Util.CallBack;
-import com.k2.Util.ObjectUtil;
-import com.k2.Util.tuple.Pair;
 
+/**
+ * The proforma output is an implementation of the ParamterEvaluator interface and as such can provide values for the parameters
+ * in a proforma.
+ * 
+ * This class extends the ParramterOrObjectEvaluator consequently the set values for parameters will take precedence over values
+ * extracted from the object that the proforma output has been set to get it's value from by calling the with(...) method.
+ * 
+ * Profoma output are created automatically when any of the methods of the proforma are called that set the output parameters of the 
+ * proforma
+ * 
+ * @author simon
+ *
+ * @param <E>	The type of the object that can be set on the proforma output to provide values for the proforma's parameters.
+ */
 public class ProformaOutput<E> extends ParamterOrObjectEvaluator<E> implements ParameterEvaluator{
 
 	private Proforma proforma;
@@ -25,17 +29,57 @@ public class ProformaOutput<E> extends ParamterOrObjectEvaluator<E> implements P
 	private String indent = "  ";
 	Collection<E> valueSources;
 	
+	/**
+	 * Create a proforma output for the given proforma
+	 * @param proforma	The proforma for which the proforma output is required
+	 */
 	public ProformaOutput(Proforma proforma) {
 		super(null);
 		this.proforma = proforma;
 	}
 
+	/**
+	 * Create a proforma output for the given proforma cloning the values from an existing profoma output
+	 * @param proforma	The proforma for which a profoma output is required
+	 * @param po		The proforma output whose values are to be cloned into the new proforma output
+	 */
+	private ProformaOutput(Proforma proforma, ProformaOutput<E> po) {
+		super(po.valueSource);
+		this.cr = po.cr;
+		this.indent = po.indent;
+		this.valueSources = po.valueSources;
+		this.parameterValues = po.parameterValues;
+		this.proforma = proforma;
+	}
+	
+	public ProformaOutput<E> clone(Proforma p) {
+		ProformaOutput<E> po = new ProformaOutput<E>(p);
+		po.cr = this.cr;
+		po.indent = this.indent;
+		po.valueSources = this.valueSources;
+		po.parameterValues = this.parameterValues;
+		return po;
+
+	}
+
+	/**
+	 * Create a proforma output for the given proforma with the given collection of value sources.
+	 * 
+	 * When such a proforma is output the output will be repeated for each object in the collection
+	 * @param proforma		The proforma defining the format of the output
+	 * @param valueSources	A collection of objects to use a sources of values for the proforma
+	 */
 	public ProformaOutput(Proforma proforma, Collection<E> valueSources) {
 		super(null);
 		this.valueSources = valueSources;
 		this.proforma = proforma;
 	}
 
+	/**
+	 * Create a proforma output for the given proforma drawing its values from the given object
+	 * @param proforma		The proforma defining the format of the output
+	 * @param valueSource	The source of values for this proforma output
+	 */
 	@SuppressWarnings("unchecked")
 	public ProformaOutput(Proforma proforma, E valueSource) {
 		super(valueSource);
@@ -57,6 +101,10 @@ public class ProformaOutput<E> extends ParamterOrObjectEvaluator<E> implements P
 		return this;
 	}
 
+	/**
+	 * Get the indent string for this proforma output
+	 * @return	The indent string that will be used by this proforma output
+	 */
 	public String getIndent() {
 		return indent;
 	}
@@ -72,6 +120,10 @@ public class ProformaOutput<E> extends ParamterOrObjectEvaluator<E> implements P
 		return this;
 	}
 	
+	/**
+	 * Get the carriage return used by this proforma output
+	 * @return	The string that will be used by the proforma output as the carriage return
+	 */
 	public String getCarriageReturn() {
 		return cr;
 	}
@@ -109,6 +161,9 @@ public class ProformaOutput<E> extends ParamterOrObjectEvaluator<E> implements P
 	}
 	/**
 	 * Write the proforma out onto the given writer with the given indent
+	 * @param i		The indent level at which to write the output
+	 * @param out	The writer on which to write the output
+	 * @return	The given writer after the proforma has been written
 	 * 
 	 * IO Exceptions thrown by the writer are converted into the unchecked ProformaError
 	 */
@@ -116,7 +171,14 @@ public class ProformaOutput<E> extends ParamterOrObjectEvaluator<E> implements P
 		return write(i, out, this);
 		
 	}
-
+	
+	/**
+	 * Write out the proforma for this proforma output with the specified indent, on the specified writer using the specified evaluator
+	 * @param i		The indent level for which this proforma should be output
+	 * @param out	The writer onto which this proforma will be written
+	 * @param po		The proforma output poviding values for this proformas paramters
+	 * @return		The writer having output the proforma for method chaining
+	 */
 	public Writer write(int i, Writer out, ProformaOutput<?> po) {
 		
 		if (valueSources != null) {
@@ -129,24 +191,26 @@ public class ProformaOutput<E> extends ParamterOrObjectEvaluator<E> implements P
 
 		for (int l=0; l<proforma.getLines().size(); l++) {
 			Line line = proforma.getLines().get(l);
-			try {
-				if (i > 0) {
-					if (l>0 || !proforma.embedded()) {
-						for (int j=0; j<i; j++) {
-							out.write(indent);
+			if (line.isIncluded(po)) {
+				try {
+					if (i > 0) {
+						if (l>0 || !proforma.embedded()) {
+							for (int j=0; j<i; j++) {
+								out.write(po.getIndent());
+							}
 						}
 					}
-				}
-
-				line.write((proforma.autoIncrementIndent()) ? i+1: i, out, po);
-
-				if (i >= 0) {
-					if (l<proforma.getLines().size()-1 || !proforma.embedded()) {
-						out.write(cr);
+	
+					line.write((proforma.autoIncrementIndent()) ? i+1: i, out, po);
+	
+					if (i >= 0) {
+						if (l<proforma.getLines().size()-1 || !proforma.embedded()) {
+							out.write(cr);
+						}
 					}
+				} catch (IOException e) {
+					throw new ProformaError(e);
 				}
-			} catch (IOException e) {
-				throw new ProformaError(e);
 			}
 		}
 		return out;

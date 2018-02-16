@@ -1,5 +1,6 @@
 package com.k2.Proforma;
 
+import com.k2.Expressions.expression.Expression;
 import com.k2.Expressions.expression.ParameterExpression;
 
 /**
@@ -21,5 +22,28 @@ public class Parameter<T> extends ParameterExpression<T>{
 	 */
 	Parameter(Class<T> javaType, String alias){
 		super(javaType, alias);
+	}
+	
+	/**
+	 * The conditional expression which determines whether the parameter part generated from this parameter should be included in the output
+	 */
+	private Expression<Boolean> conditionalExpression;
+	
+	/**
+	 * Identify that the parameter part for this parameter should be conditionally included according to the given boolean expression
+	 * @param conditionalExpression		The boolean expression controlling whether this parameters parameter part is included in the output
+	 * @return		This parameter for method chaining
+	 */
+	public Parameter<T> includeIf(Expression<Boolean> conditionalExpression) {
+		this.conditionalExpression = conditionalExpression;
+		return this;
+	}
+	
+	/**
+	 * Get the boolean expression that controls whether the parameter part for this parameter should be included in the output
+	 * @return	The conditional expression that determines whether the parameter should be included or not
+	 */
+	public Expression<Boolean> includeIf() {
+		return conditionalExpression;
 	}
 }
