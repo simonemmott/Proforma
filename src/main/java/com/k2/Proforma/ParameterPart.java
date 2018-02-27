@@ -53,8 +53,9 @@ public class ParameterPart extends AbstractPart implements Part {
 				out.write(StringUtil.toString(i.next()));
 			}
 		} else {
-			out.write(StringUtil.toString(value));
+			out.write(StringUtil.toString((value==null)?"":value));
 		}
+		if (po.autoFlush()) out.flush();
 		return out;
 	}
 

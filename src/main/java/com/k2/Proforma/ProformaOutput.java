@@ -28,6 +28,7 @@ public class ProformaOutput<E> extends ParamterOrObjectEvaluator<E> implements P
 	private String cr = String.format("%n");
 	private String indent = "  ";
 	Collection<E> valueSources;
+	private boolean autoFlush = false;
 	
 	/**
 	 * Create a proforma output for the given proforma
@@ -58,6 +59,7 @@ public class ProformaOutput<E> extends ParamterOrObjectEvaluator<E> implements P
 		po.indent = this.indent;
 		po.valueSources = this.valueSources;
 		po.parameterValues = this.parameterValues;
+		po.autoFlush = this.autoFlush;
 		return po;
 
 	}
@@ -99,6 +101,24 @@ public class ProformaOutput<E> extends ParamterOrObjectEvaluator<E> implements P
 	public ProformaOutput<E> setIndent(String indent) {
 		this.indent = indent;
 		return this;
+	}
+	
+	/**
+	 * Set the output of this proforma output to flush it output after each line
+	 * @param autoFlush	Whether or not to flush the output at the end of each line 
+	 * @return	This proforma output for method chaining
+	 */
+	public ProformaOutput<E> setAutoFlush(boolean autoFlush) {
+		this.autoFlush = autoFlush;
+		return this;
+	}
+
+	/**
+	 * Set the output of this proforma output to flush it output after each line
+	 * @return	This proforma output for method chaining
+	 */
+	public boolean autoFlush() {
+		return autoFlush;
 	}
 
 	/**
@@ -200,18 +220,28 @@ public class ProformaOutput<E> extends ParamterOrObjectEvaluator<E> implements P
 							}
 						}
 					}
-	
+					
 					line.write((proforma.autoIncrementIndent()) ? i+1: i, out, po);
-	
+					
 					if (i >= 0) {
 						if (l<proforma.getLines().size()-1 || !proforma.embedded()) {
 							out.write(cr);
+							try {
+								if (autoFlush) out.flush();
+							} catch (IOException e) {
+								throw new ProformaError("Unable to flush, message {}", e, e.getMessage());
+							}
 						}
 					}
 				} catch (IOException e) {
 					throw new ProformaError(e);
 				}
 			}
+		}
+		try {
+			if (autoFlush) out.flush();
+		} catch (IOException e) {
+			throw new ProformaError("Unable to flush, message {}", e, e.getMessage());
 		}
 		return out;
 	}

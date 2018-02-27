@@ -98,63 +98,6 @@ public class ProformaTest {
 		
 	}
 
-	/*
-	@Test
-	public void callbackTest()
-    {
-		
-		Proforma proforma = new Proforma()
-							.add("This is ", Proforma.param(String.class, "name"), " template")
-							.add("This is line 2")
-							.add("This line has another ", Proforma.param(String.class, "parameter"))
-							.add("This line had two parameters ", Proforma.param(String.class, "name"), " and ", Proforma.param(String.class, "parameter"));
-		
-		String exprected = 	"\t\t\tThis is MY0 template\n" + 
-				"\t\t\tThis is line 2\n" + 
-				"\t\t\tThis line has another PARAMETER0\n" + 
-				"\t\t\tThis line had two parameters MY0 and PARAMETER0\n";
-
-		StringWriter sw = new StringWriter();
-
-		proforma.set(String.class, "name", new CallBack<String>() {
-					int i=0;
-					@Override public String get() {return "MY"+i++;}
-					@Override public Class<String> getJavaType() {return String.class;}})
-				.set(String.class, "parameter", new CallBack<String>() { 
-					int i=0; 
-					@Override public String get() {return "PARAMETER"+i++;}
-					@Override public Class<String> getJavaType() {return String.class;}})
-				.setIndent("\t")
-				.write(3, sw);
-		
-		assertEquals(exprected, sw.toString());
-		
-	}
-	
-	@Test
-	public void outputTest() throws IOException
-    {
-		
-		Proforma proforma = new Proforma()
-							.add("This is ", Proforma.param(String.class, "name"), " template")
-							.add("This is line 2")
-							.add("This line has another ", Proforma.param(String.class, "parameter"))
-							.add("This line had two parameters ", Proforma.param(String.class, "name"), " and ", Proforma.param(String.class, "parameter"));
-		
-		proforma.set(String.class, "name", new CallBack<String>() { 
-					int i=0; 
-					@Override public String get() {return "MY"+i++;}
-					@Override public Class<String> getJavaType() {return String.class;}})
-				.set(String.class, "parameter", new CallBack<String>() { 
-					int i=0; 
-					@Override public String get() {return "PARAMETER"+i++;}
-					@Override public Class<String> getJavaType() {return String.class;}})
-				.setIndent("\t")
-				.write(3, new PrintWriter(System.out)).flush();
-		
-		
-	}
-	*/
 	class Bar {
 		Integer id;
 		String name;
@@ -192,7 +135,34 @@ public class ProformaTest {
 		}
 		Foo add(Bar bar) { bars.add(bar); return this;}
 	}
+	Proforma barOnALine = new Proforma()
+			.add(Proforma.param("name"));
+
+	Proforma listTestProforma = new Proforma()
+			.add("Start")
+			.add(barOnALine.with(Proforma.param(List.class, "bars")))
+			.add("End");
 	
+	@Test
+	public void listTest() throws IOException {
+		Foo foo = new Foo(1, "hello", "world!").add(new Bar(1, "Hello")).add(new Bar(2, "World!"));
+
+		StringWriter sw = new StringWriter();
+
+		String expected = 	
+				"Start\n" + 
+				"  Hello\n" + 
+				"  World!\n" + 
+				"\n" + 
+				"End\n";
+
+		listTestProforma.with(foo).setAutoFlush(true).write(sw).flush();
+		
+		assertEquals(expected, sw.toString());
+
+	}
+
+		
 	Proforma simpleFooProforma = new Proforma()
 			.add("ID: ", Proforma.param(Integer.class, "id"))
 			.add("Name: ", Proforma.param(String.class, "name"))
@@ -494,9 +464,10 @@ public class ProformaTest {
 		Foo foo = new Foo(1, "hello", "world!");
 
 		String included = 	"This proforma may contain\n" + 
-				"ID: 1\n" + 
+				"\tID: 1\n" + 
 				"\tName: hello\n" + 
 				"\tDescription: world!\n" +
+				"\n" +
 				"another proforma\n";
 
 		String excluded = 	"This proforma may contain\n" + 

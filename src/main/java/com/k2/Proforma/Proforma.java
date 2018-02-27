@@ -47,11 +47,20 @@ public class Proforma extends AbstractPart implements Part
 	private boolean embedded = false;
 	private boolean autoIncrementIndent = true;
 	private Parameter<?> valueSourceParameter;
+	private String name;
 	
 	/**
 	 * Create a new default (empty) proforma
 	 */
 	public Proforma() {}
+	
+	/**
+	 * Create a proforma with the given name
+	 * @param name	The name for this proforma
+	 */
+	public Proforma(String name) { this.name = name; }
+	
+	public String getName() { return name; }
 	
 	/**
 	 * Create a new proforma as a clone of the given proforma
@@ -60,12 +69,35 @@ public class Proforma extends AbstractPart implements Part
 	 */
 	private Proforma(Proforma clone) {
 		this.autoIncrementIndent = clone.autoIncrementIndent;
-		this.embedded = clone.autoIncrementIndent;
+		this.embedded = clone.embedded;
 		this.lines = clone.lines;
 		this.valueSourceParameter = clone.valueSourceParameter;
 		this.conditionalExpression = clone.conditionalExpression;
 	}
 	
+	/**
+	 * This static method generates a String parameter with the given alias
+	 * @param alias		The alias for the parameter
+	 * @return			A parameter with the given alias
+	 */
+	public static Parameter<String> param(String alias) {
+		return new Parameter<String>(String.class, alias);
+	}
+	public static Parameter<String> p(String alias) {
+		return param(String.class, alias);
+	}
+	
+	/**
+	 * Create an indent part that will ouput the current indent into the output
+	 * @return	An indent part
+	 */
+	public static IndentPart indent() {
+		return new IndentPart();
+	}
+	public static IndentPart i() {
+		return indent();
+	}
+
 	/**
 	 * This static method generates a parameter with the given alias
 	 * @param cls		The class of the value supplied by the parameter
@@ -75,6 +107,9 @@ public class Proforma extends AbstractPart implements Part
 	 */
 	public static <T> Parameter<T> param(Class<T> cls, String alias) {
 		return new Parameter<T>(cls,alias);
+	}
+	public static <T> Parameter<T> p(Class<T> cls, String alias) {
+		return param(cls,alias);
 	}
 
 	/**
@@ -252,12 +287,17 @@ public class Proforma extends AbstractPart implements Part
 				while (i.hasNext()) {
 					po.with(i.next()).write(indent, out);
 				}
+				if (po.autoFlush()) out.flush();
 				return out;
 			} else {
-				return ((ProformaOutput<?>) po.with(value)).write(indent, out);
+				out = ((ProformaOutput<?>) po.with(value)).write(indent, out);
+				if (po.autoFlush()) out.flush();
+				return out;
 			}
 		}
-		return po.write(indent, out, poIn);
+		out = po.write(indent, out, poIn);
+		if (po.autoFlush()) out.flush();
+		return out;
 	}
 
 }

@@ -11,38 +11,32 @@ import com.k2.Expressions.expression.Expression;
  * @author simon
  *
  */
-public class StringPart extends AbstractPart implements Part {
+public class IndentPart extends AbstractPart implements Part {
 	
-	/**
-	 * The static string value of this part of the proforma line
-	 */
-	private final String value;
 	/**
 	 * Create the string part for the given string
 	 * @param value	The string to use for the static string part of a proforma line
 	 */
-	StringPart(String value) {
-		this.value = value;
+	IndentPart() {
 	}
 	
 	/**
 	 * Create a new String part as a clone of the given string part
 	 * @param clone		The string part to clone
 	 */
-	private StringPart(StringPart clone) {
-		this.value = clone.value;
+	private IndentPart(IndentPart clone) {
 	}
 	
 	@Override
 	public Writer write(int indent, Writer out, ProformaOutput<?> po) throws IOException {
-		out.write(value);
+		out.write(po.getIndent());
 		if (po.autoFlush()) out.flush();
 		return out;
 	}
 
 	@Override
-	public StringPart includeIf(Expression<Boolean> conditionalExpression) {
-		StringPart p = new StringPart(this);
+	public IndentPart includeIf(Expression<Boolean> conditionalExpression) {
+		IndentPart p = new IndentPart(this);
 		p.conditionalExpression = conditionalExpression;
 		return p;
 	}

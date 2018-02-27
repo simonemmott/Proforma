@@ -83,6 +83,7 @@ public class Line {
 		for (Part part : parts) {
 			if (part.isIncluded(po)) part.write(indent, out, po);
 		}
+		if (po.autoFlush()) out.flush();
 	}
 	
 	/**
