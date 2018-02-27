@@ -5,7 +5,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.k2.Expressions.expression.Expression;
+import com.k2.Expressions.expression.K2Expression;
 import com.k2.Util.StringUtil;
 
 /**
@@ -90,14 +90,14 @@ public class Line {
 	 * The boolean expression that defines whether this line should be included in the output
 	 * If this field is null then the line is included in the output
 	 */
-	Expression<Boolean> conditionalExpression;
+	K2Expression<Boolean> conditionalExpression;
 	
 	/**
 	 * This method set the conditional expression which determines whether this line should be included in the output
 	 * @param conditionalExpression		The conditional expression that determines whether this line should be included in the output
 	 * @return	This line for method chaining
 	 */
-	public Line includeIf(Expression<Boolean> conditionalExpression) {
+	public Line includeIf(K2Expression<Boolean> conditionalExpression) {
 		this.conditionalExpression = conditionalExpression;
 		return this;
 	}

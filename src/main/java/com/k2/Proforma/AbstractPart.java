@@ -1,6 +1,6 @@
 package com.k2.Proforma;
 
-import com.k2.Expressions.expression.Expression;
+import com.k2.Expressions.expression.K2Expression;
 
 /**
  * The abstract part provides the conditional part handling for parameter and string parts
@@ -10,7 +10,7 @@ import com.k2.Expressions.expression.Expression;
  */
 public abstract class AbstractPart implements Part {
 
-	Expression<Boolean> conditionalExpression;
+	K2Expression<Boolean> conditionalExpression;
 		
 	@Override
 	public boolean isIncluded(ProformaOutput<?> po) {

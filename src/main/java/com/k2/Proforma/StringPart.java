@@ -3,7 +3,7 @@ package com.k2.Proforma;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.k2.Expressions.expression.Expression;
+import com.k2.Expressions.expression.K2Expression;
 
 /**
  * This class represents a static string on a proforma line
@@ -41,7 +41,7 @@ public class StringPart extends AbstractPart implements Part {
 	}
 
 	@Override
-	public StringPart includeIf(Expression<Boolean> conditionalExpression) {
+	public StringPart includeIf(K2Expression<Boolean> conditionalExpression) {
 		StringPart p = new StringPart(this);
 		p.conditionalExpression = conditionalExpression;
 		return p;

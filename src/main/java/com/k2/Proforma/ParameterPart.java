@@ -5,7 +5,7 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Iterator;
 
-import com.k2.Expressions.expression.Expression;
+import com.k2.Expressions.expression.K2Expression;
 import com.k2.Util.StringUtil;
 
 /**
@@ -60,7 +60,7 @@ public class ParameterPart extends AbstractPart implements Part {
 	}
 
 	@Override
-	public ParameterPart includeIf(Expression<Boolean> conditionalExpression) {
+	public ParameterPart includeIf(K2Expression<Boolean> conditionalExpression) {
 		ParameterPart p = new ParameterPart(this);
 		p.conditionalExpression = conditionalExpression;
 		return p;

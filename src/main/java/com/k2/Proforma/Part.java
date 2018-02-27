@@ -3,7 +3,7 @@ package com.k2.Proforma;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.k2.Expressions.expression.Expression;
+import com.k2.Expressions.expression.K2Expression;
 
 /**
  * This interface defines parts of a proforma line
@@ -23,7 +23,7 @@ public interface Part {
 	 * @param conditionalExpression		The boolean expression controlling whether or not this part should be included in the output
 	 * @return		A clone of this part with it's output controlled by the given boolean expression
 	 */
-	public Part includeIf(Expression<Boolean> conditionalExpression);
+	public Part includeIf(K2Expression<Boolean> conditionalExpression);
 	
 	/**
 	 * Evaluate using the given ProformaOutput implementing Evaluator whther or not this part should be included in the output

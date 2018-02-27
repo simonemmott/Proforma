@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import com.k2.Expressions.expression.Expression;
+import com.k2.Expressions.expression.K2Expression;
 import com.k2.Util.StringUtil;
 
 /**
@@ -119,7 +119,7 @@ public class Proforma extends AbstractPart implements Part
 	 * @param value			The object this is to be converted into a String part using StringUtil.toString()
 	 * @return				The resultant conditional string part
 	 */
-	public static StringPart includeIf(Expression<Boolean> includeIf, Object value) {
+	public static StringPart includeIf(K2Expression<Boolean> includeIf, Object value) {
 		return new StringPart(StringUtil.toString(value)).includeIf(includeIf);
 	}
 	
@@ -152,7 +152,7 @@ public class Proforma extends AbstractPart implements Part
 	 * @param parts						The parts comprising this line
 	 * @return							This proforma for method chaining
 	 */
-	public Proforma addIf(Expression<Boolean> conditionalExpression, Object ...parts) {
+	public Proforma addIf(K2Expression<Boolean> conditionalExpression, Object ...parts) {
 		lines.add(new Line(parts).includeIf(conditionalExpression));
 		return this;
 	}
@@ -176,7 +176,7 @@ public class Proforma extends AbstractPart implements Part
 	boolean autoIncrementIndent() { return autoIncrementIndent; }
 	
 	@Override
-	public Proforma includeIf(Expression<Boolean> conditionalExpression) {
+	public Proforma includeIf(K2Expression<Boolean> conditionalExpression) {
 		Proforma p = new Proforma(this);
 		p.conditionalExpression = conditionalExpression;
 		return p;

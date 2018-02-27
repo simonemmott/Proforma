@@ -3,7 +3,7 @@ package com.k2.Proforma;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.k2.Expressions.expression.Expression;
+import com.k2.Expressions.expression.K2Expression;
 
 /**
  * This class represents a static string on a proforma line
@@ -35,7 +35,7 @@ public class IndentPart extends AbstractPart implements Part {
 	}
 
 	@Override
-	public IndentPart includeIf(Expression<Boolean> conditionalExpression) {
+	public IndentPart includeIf(K2Expression<Boolean> conditionalExpression) {
 		IndentPart p = new IndentPart(this);
 		p.conditionalExpression = conditionalExpression;
 		return p;
