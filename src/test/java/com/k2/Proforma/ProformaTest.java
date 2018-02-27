@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.k2.Expressions.expression.ParameterExpression;
+import com.k2.Expressions.expression.K2ParameterExpression;
 import com.k2.Util.CallBack;
 
 public class ProformaTest {

@@ -1,7 +1,7 @@
 package com.k2.Proforma;
 
 import com.k2.Expressions.expression.K2Expression;
-import com.k2.Expressions.expression.ParameterExpression;
+import com.k2.Expressions.expression.K2ParameterExpression;
 
 /**
  * This class represents a parameterized String value
@@ -14,7 +14,7 @@ import com.k2.Expressions.expression.ParameterExpression;
  * @author simon
  *
  */
-public class Parameter<T> extends ParameterExpression<T>{
+public class Parameter<T> extends K2ParameterExpression<T>{
 	/**
 	 * Create a parameter with the given alias
 	 * 
